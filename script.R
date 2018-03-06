@@ -1,6 +1,7 @@
 ### LIBRARIES
 
 library(dplyr)
+library(plyr)
 library(car)
 
 ### READING DATA
@@ -8,7 +9,10 @@ setwd("/Users/lukasmohs/Desktop/MA-data-analysis/") #adjust to directiory
 data = read.csv("data.csv",sep=',')
 
 ### MODIFY DATA
-data <- mutate(data, X1a = ifelse(data$X1a == 'Bachelor Student', 1,  ifelse(data$X1a == 'Master Student', 2,  ifelse(data$X1a == 'PHD Student', 3, 0))))
+levels(data$X1a)
+#[1] "Alumni"           "Bachelor Student" "Master Student"   "PHD Student"   
+data$X1a =  as.numeric(data$X1a)
+
 data <- mutate(data, X1d = ifelse(data$X1d == 'Public Transport', 1,  ifelse(data$X1d == 'Both: Car &Public Transport', 2,  ifelse(data$X1d == 'Car', 3, 0))))
 data$X.1c. = gsub(",", ".", data$X.1c.)
 data$X.1c. = as.double(as.character(data$X.1c.))
@@ -39,26 +43,46 @@ data$X7b = as.double(as.character(data$X7b))
 data <- mutate(data, epdkm = ifelse(!is.na(data$X7b), X7b/10 ,  NA))
 
 levelsX9a = levels(data$X9a)
-#[1] ""    [2] "0 Need"   [3] "0t interested financially"   [4] "Loss of flexibility"                                                
-# [5] "Loss of privacy"    [6] "Public transport is more convenient"                                
-# [7] "Public transport is more convenient and especially more sustainable"
-# [8] "Traffic jams"     [9] "Umwelt" 
+#[1] ""    [2] "0 Need"   [3] "0t interested financially"   [4] "Loss of flexibility" [5] "Loss of privacy"    [6] "Public transport is more convenient"                                
+# [7] "Public transport is more convenient and especially more sustainable"  [8] "Traffic jams"     [9] "Umwelt" 
 data$X9a = as.numeric(data$X9a)
 data <- mutate(data, X9a = ifelse(X9a!=1,X9a ,  NA))
 
 
 
 ### EXPLORATION
+#Population
 n = length(data$X1a) # 136
+numberCarDrivers = length(which(data$X1d == 3)) # 35
+numberNonCarDrivers = length(which(data$X1d != 3)) # 101
+
+#Gender
+length(which(data$X1b == "Male")) #101
+length(which(data$X1b == "Female")) #35
+#Percent Male
+length(which(data$X1b == "Male")) / n # 0.7426471
+
+#Degree #[1] "Alumni"           "Bachelor Student" "Master Student"   "PHD Student"   
+count(data$X1a)
+#x freq
+#1    1
+#2   87
+#3   46
+#4    2
+
+#Sum Carpool already
+length(which(data$X3a == 0)) #4
+#Perent Carpool already
+length(which(data$X3a == 0)) / n # 0.02941176
 
 # Percent Intrerested
 length(which(data$X2a == 1)) / n # 0.595
 
 # Percent Car Intrerested
-length(which(data$X2a == 1 & data$X1d == 3)) / length(which(data$X1d == 3)) # 0.828
+length(which(data$X2a == 1 & data$X1d == 3)) / numberCarDrivers # 0.828
 
 # Percent Not Car Intrerested
-length(which(data$X2a == 1 & data$X1d != 3)) / length(which(data$X1d != 3)) # 0.514
+length(which(data$X2a == 1 & data$X1d != 3)) / numberNonCarDrivers # 0.514
 
 # Travel Distance on Travel Option
 hist(data$X.1c.,xlab="Travel Kilometers",main="", breaks=50)
@@ -107,8 +131,23 @@ mean(data$epdkm, na.rm=TRUE)
 median(data$epdkm, na.rm=TRUE)
 
 
-
 # Reasons for not Founding / Joingin a Carpool
 hist(data$X9a,xlab="Reasons for not Founding / Joingin a Carpool")
 legend("topright", 95, legend=c(levelsX9a), cex=.8)
 
+count(data$X9a)
+#x freq
+#NA   82
+#2    3
+#3    6
+#4   13
+#5    1
+#6   28
+#7    1
+#8    1
+#9    1
+levelsX9a
+#[1] ""    [2] "0 Need"   [3] "0t interested financially"   [4] "Loss of flexibility"                                                
+# [5] "Loss of privacy"    [6] "Public transport is more convenient"                                
+# [7] "Public transport is more convenient and especially more sustainable"
+# [8] "Traffic jams"     [9] "Umwelt" 
