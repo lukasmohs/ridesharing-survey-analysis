@@ -46,15 +46,22 @@ levelsX9a = levels(data$X9a)
 data$X9a = as.numeric(data$X9a)
 data <- mutate(data, X9a = ifelse(X9a!=1,X9a ,  NA))
 
-### EXPLORATION
-summary(data)
 
-# Degree on Travel Distance
-plot(data$X1a,data$X.1c.,xlab="Degree ", ylab="Travel Distance")
-abline(lm(X.1c. ~ X1a, data=data),col="red")
+
+### EXPLORATION
+n = length(data$X1a) # 136
+
+# Percent Intrerested
+length(which(data$X2a == 1)) / n # 0.595
+
+# Percent Car Intrerested
+length(which(data$X2a == 1 & data$X1d == 3)) / length(which(data$X1d == 3)) # 0.828
+
+# Percent Not Car Intrerested
+length(which(data$X2a == 1 & data$X1d != 3)) / length(which(data$X1d != 3)) # 0.514
 
 # Travel Distance on Travel Option
-hist(data$X.1c.,xlab="Travel Kilometers")
+hist(data$X.1c.,xlab="Travel Kilometers",main="", breaks=50)
 plot(data$X.1c.,data$X1d, xlab="Travel Distance", ylab="Traevl Option")
 abline(lm(X1d ~ X.1c., data=data),col="red")
 
