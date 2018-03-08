@@ -8,14 +8,21 @@ library(car)
 setwd("/Users/lukasmohs/Desktop/MA-data-analysis/") #adjust to directiory
 data = read.csv("data.csv",sep=',')
 
+
 ### MODIFY DATA
 levels(data$X1a)
 #[1] "Alumni"           "Bachelor Student" "Master Student"   "PHD Student"   
-data$X1a =  as.numeric(data$X1a)
+data <- mutate(data, X1a2 = as.numeric(data$X1a))
 
-data <- mutate(data, X1d = ifelse(data$X1d == 'Public Transport', 1,  ifelse(data$X1d == 'Both: Car &Public Transport', 2,  ifelse(data$X1d == 'Car', 3, 0))))
+
+data <- mutate(data, X1d2 = ifelse(data$X1d == 'Public Transport', 1,  ifelse(data$X1d == 'Both: Car &Public Transport', 2,  ifelse(data$X1d == 'Car', 3, 0))))
+data <- mutate(data, X1d3 = ifelse(data$X1d == 'Car', 1,  0))
+
+
 data$X.1c. = gsub(",", ".", data$X.1c.)
 data$X.1c. = as.double(as.character(data$X.1c.))
+data <- mutate(data, X.1c.2 = ifelse(data$X2a == 1, X.1c.,  NA))
+
 data$X5a = as.POSIXct(strptime(data$X5a,format='%H:%M:%S'))
 data$X5b = as.POSIXct(strptime(data$X5b,format='%H:%M:%S'))
 data <- mutate(data, X5c = ifelse(data$X5c == '5 Minutes', 5,  ifelse(data$X5c == '10 Minutes', 10,  ifelse(data$X5c == '15 Minutes', 15, ifelse(data$X5c == '20 Minutes', 20, ifelse(data$X5c == '30 Minutes', 30, 40))))))
@@ -50,10 +57,12 @@ data <- mutate(data, X9a = ifelse(X9a!=1,X9a ,  NA))
 
 
 
+
+
 ### EXPLORATION
 #Population
-n = length(data$X1a) # 136
-numberCarDrivers = length(which(data$X1d == 3)) # 35
+n = length(data$X1a2) # 136
+numberCarDrivers = length(which(data$X1d2 == 3)) # 35
 numberNonCarDrivers = length(which(data$X1d != 3)) # 101
 
 #Gender
@@ -63,7 +72,7 @@ length(which(data$X1b == "Female")) #35
 length(which(data$X1b == "Male")) / n # 0.7426471
 
 #Degree #[1] "Alumni"           "Bachelor Student" "Master Student"   "PHD Student"   
-count(data$X1a)
+count(data$X1a2)
 #x freq
 #1    1
 #2   87
@@ -79,19 +88,28 @@ length(which(data$X3a == 0)) / n # 0.02941176
 length(which(data$X2a == 1)) / n # 0.595
 
 # Percent Car Intrerested
-length(which(data$X2a == 1 & data$X1d == 3)) / numberCarDrivers # 0.828
+length(which(data$X2a == 1 & data$X1d2 == 3)) / numberCarDrivers # 0.828
 
 # Percent Not Car Intrerested
 length(which(data$X2a == 1 & data$X1d != 3)) / numberNonCarDrivers # 0.514
 
+# Travel Distance
+mean(data$X.1c) # 23.82794
+median(data$X.1c) #18.1
+hist(data$X.1c.,xlab="Travel Kilometers",main="", breaks=50, col="red")
+hist(data$X.1c.2,add=T, col="green", breaks=50)
+legend("topright", c("All Respondents", "Interested Respondents"), fill=c("red", "green"))
+
 # Travel Distance on Travel Option
-hist(data$X.1c.,xlab="Travel Kilometers",main="", breaks=50)
 plot(data$X.1c.,data$X1d, xlab="Travel Distance", ylab="Traevl Option")
 abline(lm(X1d ~ X.1c., data=data),col="red")
 
 #Travel Time
-hist(data$X5a,"mins",xlab="Arrival Time")
-hist(data$X5b,"mins",xlab="Departure Time")
+startHour = strptime("6:001:00",format='%H:%M:%S')
+endHour = strptime("21:45:00",format='%H:%M:%S')
+hist(data$X5b,"mins",xlab="Arrival and Departure Time",col=rgb(1,0,0,0.4), breaks=50, xlim=as.POSIXct(c(startHour,endHour)))
+hist(data$X5a,"mins",xlab="Arrival Time",add=T, col=rgb(0,1,0,0.4), breaks=35)
+axis(side=1, at=seq(startHour,endHour, 10), labels=seq(0,1000,100))
 
 startHour = strptime("7:00:00",format='%H:%M:%S')
 endHour = strptime("12:00:00",format='%H:%M:%S')
@@ -111,20 +129,26 @@ hist(data$X5c)
 
 # Travel Distance on Willingsness to Pay
 hist(data$wppkm,xlab="Willingsness to Pay in Euro per Commute KM ",breaks=40)
-plot(data$X.1c.,data$X6a, xlab="Travel Distance", ylab="Willingsness to Pay for total Distance",ylim = c(0,8),xlim = c(0,90))
-abline(lm(X6a ~ X.1c., data=data),col="red")
-mean(data$wppkm, na.rm=TRUE)
-median(data$wppkm, na.rm=TRUE)
+plot(data$X.1c.,data$X6a, xlab="Travel Distance", ylab="Willingsness to Pay for total Distance",xlim = c(0,90))
+wtplm = lm(X6a ~ X.1c., data=data) #linear model by fitting
+summary(wtplm)$sigma  # residual standard deviation:  2.343433
+abline(wtplm,col="red")
+abline(0,0.3,col="blue")
+abline(0,0.6,col="green")
+legend("topright", c("Average Traveling Costs by Car (60 cents/km)","German Tax Refunds (30 cents/km)","Fitted Willingsness to Pay"), fill=c("green","blue", "red"),cex = 1.2)
+mean(data$wppkm, na.rm=TRUE) # 0.1817779
+median(data$wppkm, na.rm=TRUE) # 0.1296794
 
 # Travel Distance on Expected Payout
 hist(data$eppkm,xlab="Expected Payout in Euro per Commute KM",breaks=40)
 plot(data$X.1c.,data$X7a, xlab="Travel Distance", ylab="Expected Payout in Euro for total Distance")
 abline(lm(X7a ~ X.1c., data=data),col="red")
-mean(data$eppkm, na.rm=TRUE)
-median(data$eppkm, na.rm=TRUE)
+abline(0,0.3,col="blue")
+mean(data$eppkm, na.rm=TRUE) # 0.1262702
+median(data$eppkm, na.rm=TRUE) # 0.09353147
 
 # Detour Distance on Expected Payout
-hist(data$epdkm,xlab="Expected Payout in Euro per Detour KM",breaks=20)
+hist(data$epdkm,xlab="Expected Payout in Euro per Detour KM",breaks=40)
 plot(data$X.1c.,data$X7b, xlab="Travel Distance", ylab="Expected Payout in Euro per 10 Detour KM")
 abline(lm(X7b ~ X.1c., data=data),col="red")
 mean(data$epdkm, na.rm=TRUE)
@@ -147,7 +171,18 @@ count(data$X9a)
 #8    1
 #9    1
 levelsX9a
-#[1] ""    [2] "0 Need"   [3] "0t interested financially"   [4] "Loss of flexibility"                                                
+#[1] ""    [2] "No Need"   [3] "Not interested financially"   [4] "Loss of flexibility"                                                
 # [5] "Loss of privacy"    [6] "Public transport is more convenient"                                
 # [7] "Public transport is more convenient and especially more sustainable"
 # [8] "Traffic jams"     [9] "Umwelt" 
+
+### Influence on Ride-sharing
+lm = lm(X2a ~ X1a + X1b + X.1c. + X1d2, data=data)
+summary(lm)
+
+lr <- glm(X2a ~ X.1c. + X1d2, family=binomial(link='logit'),data=data)
+summary(lr)
+dataTest <- data[c(which( colnames(data)=="X.1c."), which( colnames(data)=="X1d2"))]
+lrAccuracy <- (sum(predict(lr, dataTest, type="response")>0.5 & data$X2a==1) 
+               + sum(predict(lr, dataTest, type="response")<0.5 & data$X2a==0) ) / nrow(data)
+lrAccuracy # 0.6470588
