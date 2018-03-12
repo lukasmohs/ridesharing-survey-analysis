@@ -25,7 +25,7 @@ data <- mutate(data, X.1c.2 = ifelse(data$X2a == 1, X.1c.,  NA))
 
 data$X5a = as.POSIXct(strptime(data$X5a,format='%H:%M:%S'))
 data$X5b = as.POSIXct(strptime(data$X5b,format='%H:%M:%S'))
-data <- mutate(data, X5c = ifelse(data$X5c == '5 Minutes', 5,  ifelse(data$X5c == '10 Minutes', 10,  ifelse(data$X5c == '15 Minutes', 15, ifelse(data$X5c == '20 Minutes', 20, ifelse(data$X5c == '30 Minutes', 30, 40))))))
+data <- mutate(data, X5c2 = ifelse(data$X5c == '5 Minutes', 1,  ifelse(data$X5c == '10 Minutes', 2,  ifelse(data$X5c == '15 Minutes', 3, ifelse(data$X5c == '20 Minutes', 4, ifelse(data$X5c == '30 Minutes', 5, 6))))))
 data <- mutate(data, X5d = ifelse(data$X5d == 'Less than 2 hours', 1,  ifelse(data$X5d == '2 - 12 hours', 2,  ifelse(data$X5d == '12 - 24 hours', 3, ifelse(data$X5d == 'more than 24 hours', 4, 0)))))
 levelsX5e = levels(data$X5e)
 #[1] ""                              "All"                           "All of the above"              "Bank Transfer"                 "Bier"                         
@@ -105,11 +105,14 @@ plot(data$X.1c.,data$X1d, xlab="Travel Distance", ylab="Traevl Option")
 abline(lm(X1d ~ X.1c., data=data),col="red")
 
 #Travel Time
-startHour = strptime("6:001:00",format='%H:%M:%S')
-endHour = strptime("21:45:00",format='%H:%M:%S')
-hist(data$X5b,"mins",xlab="Arrival and Departure Time",col=rgb(1,0,0,0.4), breaks=50, xlim=as.POSIXct(c(startHour,endHour)))
-hist(data$X5a,"mins",xlab="Arrival Time",add=T, col=rgb(0,1,0,0.4), breaks=35)
-axis(side=1, at=seq(startHour,endHour, 10), labels=seq(0,1000,100))
+startHour = strptime("6:00:00",format='%H:%M:%S')
+endHour = strptime("22:00:00",format='%H:%M:%S')
+series <- seq(from = startHour, to = endHour, by = "hour")
+hist(data$X5b,"mins",xlab="Arrival and Departure Time",col=rgb(1,0,0,0.4), breaks=50, xlim=as.POSIXct(c(startHour,endHour)),xaxt='n', ann=FALSE)
+hist(data$X5a,"mins",xlab="Arrival Time",add=T, col=rgb(0,1,0,0.4), breaks=35, xaxt='n', ann=FALSE)
+axis.POSIXct(1, at=c(series), labels=format(series, '%H:%M'))
+legend("topright", c("Arrival Time","Departure Time"), fill=c(rgb(0,1,0,0.4),rgb(1,0,0,0.4)),cex = 1.2)
+
 
 startHour = strptime("7:00:00",format='%H:%M:%S')
 endHour = strptime("12:00:00",format='%H:%M:%S')
@@ -124,11 +127,14 @@ axis.POSIXct(2, at=startHour, labels=format(startHour, '%H:%M:%S'))
 axis.POSIXct(2, at=endHour, labels=format(endHour, '%H:%M:%S'))
 
 # Flexibility
-hist(data$X5c)
+count(data$X5c2)
+hist(data$X5c2, breaks=0:6, xaxt='n',  xlab="Time Flexibility of Respondents", main="")
+axis(1,c(0.5:5.5),c("5 minutes","10 minutes","15 minutes","20 minutes","30 minutes",">30 minutes"))
 
 
 # Travel Distance on Willingsness to Pay
-hist(data$wppkm,xlab="Willingsness to Pay in Euro per Commute KM ",breaks=40)
+hist(data$wppkm,xlab="Willingsness to Pay in Euro per Commute KM ",breaks=40,main="",xaxt='n')
+axis(1,c(seq(0, 1, 0.05)),c(seq(0, 1, 0.05)),ylab="bla")
 plot(data$X.1c.,data$X6a, xlab="Travel Distance", ylab="Willingsness to Pay for total Distance",xlim = c(0,90))
 wtplm = lm(X6a ~ X.1c., data=data) #linear model by fitting
 summary(wtplm)$sigma  # residual standard deviation:  2.343433
@@ -141,18 +147,39 @@ median(data$wppkm, na.rm=TRUE) # 0.1296794
 
 # Travel Distance on Expected Payout
 hist(data$eppkm,xlab="Expected Payout in Euro per Commute KM",breaks=40)
-plot(data$X.1c.,data$X7a, xlab="Travel Distance", ylab="Expected Payout in Euro for total Distance")
-abline(lm(X7a ~ X.1c., data=data),col="red")
+plot(data$X.1c.,data$X7a, xlab="Travel Distance", ylab="Expected Payout in Euro for total Distance",xlim = c(0,120),ylim = c(0,10))
+eppklm = lm(X7a ~ X.1c., data=data)
+summary(eppklm)$sigma #1.066353
+abline(eppklm,col="red")
 abline(0,0.3,col="blue")
+abline(0,0.6,col="green")
+legend("topright", c("Average Traveling Costs by Car (60 cents/km)","German Tax Refunds (30 cents/km)","Fitted Expected Payout"), fill=c("green","blue", "red"),cex = 1.2)
 mean(data$eppkm, na.rm=TRUE) # 0.1262702
 median(data$eppkm, na.rm=TRUE) # 0.09353147
 
 # Detour Distance on Expected Payout
-hist(data$epdkm,xlab="Expected Payout in Euro per Detour KM",breaks=40)
+hist(data$epdkm,xlab="Expected Payout in Euro per Detour KM",breaks=40, main="",xaxt='n')
+axis(1,c(seq(-0.025, 2, 0.1)),c(seq(0, 2, 0.1)),ylab="bla")
 plot(data$X.1c.,data$X7b, xlab="Travel Distance", ylab="Expected Payout in Euro per 10 Detour KM")
 abline(lm(X7b ~ X.1c., data=data),col="red")
-mean(data$epdkm, na.rm=TRUE)
-median(data$epdkm, na.rm=TRUE)
+mean(data$epdkm, na.rm=TRUE) # 0.4479167
+median(data$epdkm, na.rm=TRUE) # 0.5
+
+
+
+# Combined Drive & Passenger Prices
+plot(data$X.1c.,data$X7a, xlab="Travel Distance", ylab="Expected Payout in Euro for total Distance",xlim = c(0,120),ylim = c(0,10),col="red")
+points(data$X6a,col=rgb(0.54,0.17,0.89,0.4))
+axis(4,c(seq(0, 10, 2)),c(seq(0, 10, 2)),ylab="bla",col=rgb(0.54,0.17,0.89,0.4))
+mtext("Willingness to Pay", side=4, col=rgb(0.54,0.17,0.89,0.4), line = -2)
+legend("topright", c("Average Traveling Costs by Car (60 cents/km)","German Tax Refunds (30 cents/km)","Fitted Expected Payout","Fitted Willingness to Pay"), fill=c("green","blue", "red",rgb(0.54,0.17,0.89,0.4)),cex = 1.2)
+eppklm = lm(X7a ~ X.1c., data=data)
+summary(eppklm)$sigma #1.066353
+abline(eppklm,col="red")
+abline(wtplm,col=	rgb(0.54,0.17,0.89,0.4))
+abline(0,0.3,col="blue")
+abline(0,0.6,col="green")
+
 
 
 # Reasons for not Founding / Joingin a Carpool
@@ -177,7 +204,7 @@ levelsX9a
 # [8] "Traffic jams"     [9] "Umwelt" 
 
 ### Influence on Ride-sharing
-lm = lm(X2a ~ X1a + X1b + X.1c. + X1d2, data=data)
+lm = lm(X2a ~  X.1c. + X1d2, data=data)
 summary(lm)
 
 lr <- glm(X2a ~ X.1c. + X1d2, family=binomial(link='logit'),data=data)
@@ -186,3 +213,6 @@ dataTest <- data[c(which( colnames(data)=="X.1c."), which( colnames(data)=="X1d2
 lrAccuracy <- (sum(predict(lr, dataTest, type="response")>0.5 & data$X2a==1) 
                + sum(predict(lr, dataTest, type="response")<0.5 & data$X2a==0) ) / nrow(data)
 lrAccuracy # 0.6470588
+lmAccuracy <- (sum(predict(lm, dataTest, type="response")>0.5 & data$X2a==1) 
+               + sum(predict(lm, dataTest, type="response")<0.5 & data$X2a==0) ) / nrow(data)
+lmAccuracy #  0.6323529
