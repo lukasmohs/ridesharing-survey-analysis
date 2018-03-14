@@ -183,8 +183,10 @@ abline(0,0.6,col="green")
 
 
 # Reasons for not Founding / Joingin a Carpool
-hist(data$X9a,xlab="Reasons for not Founding / Joingin a Carpool")
-legend("topright", 95, legend=c(levelsX9a), cex=.8)
+hist(data$X9a,xlab="Reasons for not Founding / Joingin a Carpool",xaxt='n',ylim=c(0, 50))
+axis(1,c(2.5:8.5),c("1", "2", "3", "4", "5", "6", "7"))
+legend("topright", 95, legend=c("1: No Need"  ,"2: Not interested financially","3: Loss of privacy","4: Public transport is more convenient",
+                                "5: Public transport is more convenient and especially more sustainable","6: Traffic jams","7: Umwelt"), cex=.8)
 
 count(data$X9a)
 #x freq
