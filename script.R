@@ -54,9 +54,24 @@ levelsX9a = levels(data$X9a)
 # [7] "Public transport is more convenient and especially more sustainable"  [8] "Traffic jams"     [9] "Umwelt" 
 data$X9a = as.numeric(data$X9a)
 data <- mutate(data, X9a = ifelse(X9a!=1,X9a ,  NA))
+data <- mutate(data, X9b = ifelse(X9a==6,1,ifelse(X9a==4,3,ifelse(X9a==3,4,ifelse(X9a==2,5,ifelse(X9a==9,7,ifelse(X9a==7,6,X9a)))))))
 
-
-
+count(data$X9a)
+#x freq
+#NA   82
+#2    3
+#3    6
+#4   13
+#5    1
+#6   28
+#7    1
+#8    1
+#9    1
+levelsX9a
+#[1] ""    [2] "No Need"   [3] "Not interested financially"   [4] "Loss of flexibility"                                                
+# [5] "Loss of privacy"    [6] "Public transport is more convenient"                                
+# [7] "Public transport is more convenient and especially more sustainable"
+# [8] "Traffic jams"     [9] "Umwelt" 
 
 
 ### EXPLORATION
@@ -98,7 +113,7 @@ mean(data$X.1c) # 23.82794
 median(data$X.1c) #18.1
 hist(data$X.1c.,xlab="Travel Kilometers",main="", breaks=50, col="red")
 hist(data$X.1c.2,add=T, col="green", breaks=50)
-legend("topright", c("All Respondents", "Interested Respondents"), fill=c("red", "green"))
+legend("topright", c("Not Interested", "Interested"), fill=c("red", "green"))
 
 # Travel Distance on Travel Option
 plot(data$X.1c.,data$X1d, xlab="Travel Distance", ylab="Traevl Option")
@@ -182,28 +197,18 @@ abline(0,0.6,col="green")
 
 
 
-# Reasons for not Founding / Joingin a Carpool
-hist(data$X9a,xlab="Reasons for not Founding / Joingin a Carpool",xaxt='n',ylim=c(0, 50), main="")
+# Reasons for not Founding / Joining a Carpool
+hist(data$X9a,xlab="Reasons for not being interested in ride-sharing",xaxt='n',ylim=c(0, 50), main="")
 axis(1,c(2.5:8.5),c("1", "2", "3", "4", "5", "6", "7"))
 legend("topright", 95, legend=c("1: No Need"  ,"2: Not interested financially","3: Loss of privacy","4: Public transport is more convenient",
-                                "5: Public transport is more convenient and especially more sustainable","6: Traffic jams","7: Umwelt"), cex=.8)
+                                "5: Public transport is more convenient and especially more sustainable","6: Traffic jams","7: Environment"), cex=.95)
 
-count(data$X9a)
-#x freq
-#NA   82
-#2    3
-#3    6
-#4   13
-#5    1
-#6   28
-#7    1
-#8    1
-#9    1
-levelsX9a
-#[1] ""    [2] "No Need"   [3] "Not interested financially"   [4] "Loss of flexibility"                                                
-# [5] "Loss of privacy"    [6] "Public transport is more convenient"                                
-# [7] "Public transport is more convenient and especially more sustainable"
-# [8] "Traffic jams"     [9] "Umwelt" 
+
+hist(data$X9b,xlab="Reasons for not being interested in ride-sharing",xaxt='n',ylim=c(0, 50), main="", breaks = 9)
+axis(1,c(1.5:7.5),c("1", "2", "3", "4", "5", "6", "7"))
+legend("topright", 95, legend=c("1: Public transport is more convenient"  ,"2: Not interested financially","3: No Need","4: Loss of privacy",
+                                "5: Public transport is more convenient and especially more sustainable","6: Traffic jams","7: Environment"), cex=.95)
+
 
 ### Influence on Ride-sharing
 lm = lm(X2a ~  X.1c. + X1d2, data=data)
