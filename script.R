@@ -143,7 +143,7 @@ axis.POSIXct(2, at=endHour, labels=format(endHour, '%H:%M:%S'))
 
 # Flexibility
 count(data$X5c2)
-hist(data$X5c2, breaks=0:6, xaxt='n',  xlab="Time Flexibility of Respondents", main="")
+hist(data$X5c2, breaks=0:6, xaxt='n',  xlab="Time Flexibility of Respondents", main="",col="gray")
 axis(1,c(0.5:5.5),c("5 minutes","10 minutes","15 minutes","20 minutes","30 minutes",">30 minutes"))
 
 
@@ -191,7 +191,7 @@ legend("topright", c("Average Traveling Costs by Car (60 cents/km)","German Tax 
 eppklm = lm(X7a ~ X.1c., data=data)
 summary(eppklm)$sigma #1.066353
 abline(eppklm,col="darkgray")
-abline(wtplm,col=	rgb(0.54,0.17,0.89,0.4))
+abline(wtplm,col=	rgb(.98,.69,.14,1))
 abline(0,0.3,col="blue")
 abline(0,0.6,col="green")
 
