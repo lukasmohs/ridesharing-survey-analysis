@@ -28,14 +28,11 @@ data$X5b = as.POSIXct(strptime(data$X5b,format='%H:%M:%S'))
 data <- mutate(data, X5c2 = ifelse(data$X5c == '5 Minutes', 1,  ifelse(data$X5c == '10 Minutes', 2,  ifelse(data$X5c == '15 Minutes', 3, ifelse(data$X5c == '20 Minutes', 4, ifelse(data$X5c == '30 Minutes', 5, 6))))))
 data <- mutate(data, X5d = ifelse(data$X5d == 'Less than 2 hours', 1,  ifelse(data$X5d == '2 - 12 hours', 2,  ifelse(data$X5d == '12 - 24 hours', 3, ifelse(data$X5d == 'more than 24 hours', 4, 0)))))
 levelsX5e = levels(data$X5e)
-#[1] ""                              "All"                           "All of the above"              "Bank Transfer"                 "Bier"                         
-#[6] "Cash"                          "Cash and bank transfer"        "Payment Service (i.e. Paypal)" "Using an app"  
 data$X5e =  as.numeric(data$X5e)
 
-levelsX5f = levels(data$X5f)
-#[1] ""                          "0 special characteristics" "Age group / study degree"  "Field of study"            "Gender"                    "Just distance"            
-#[7] "Time of arrival"    
-data$X5f =  as.numeric(data$X5f)
+data <- mutate(data, X5g = as.numeric(data$X5f))
+data <- mutate(data, X5g = ifelse(X5g!=1,X5g ,  NA))
+data <- mutate(data, X5g = ifelse(X5g==6,0,ifelse(X5g==4,2,ifelse(X5g==3,3,ifelse(X5g==5,4,ifelse(X5g==2,5,6))))))
 
 data$X6a = gsub(",", ".", data$X6a)
 data$X6a = as.double(as.character(data$X6a))
@@ -56,22 +53,8 @@ data$X9a = as.numeric(data$X9a)
 data <- mutate(data, X9a = ifelse(X9a!=1,X9a ,  NA))
 data <- mutate(data, X9b = ifelse(X9a==6,1,ifelse(X9a==4,3,ifelse(X9a==3,4,ifelse(X9a==2,5,ifelse(X9a==9,7,ifelse(X9a==7,6,X9a)))))))
 
-count(data$X9a)
-#x freq
-#NA   82
-#2    3
-#3    6
-#4   13
-#5    1
-#6   28
-#7    1
-#8    1
-#9    1
-levelsX9a
-#[1] ""    [2] "No Need"   [3] "Not interested financially"   [4] "Loss of flexibility"                                                
-# [5] "Loss of privacy"    [6] "Public transport is more convenient"                                
-# [7] "Public transport is more convenient and especially more sustainable"
-# [8] "Traffic jams"     [9] "Umwelt" 
+
+
 
 
 ### EXPLORATION
@@ -183,17 +166,18 @@ median(data$epdkm, na.rm=TRUE) # 0.5
 
 
 # Combined Drive & Passenger Prices
-plot(data$X.1c.,data$X7a, xlab="Travel Distance", ylab="Expected Payout in Euro for total Distance",xlim = c(0,120),ylim = c(0,10),col="darkgray")
+plot(data$X.1c.,data$X7a, xlab="Travel Distance in Kilometer", ylab="Expected Payout in Euro for total Distance",xlim = c(0,120),ylim = c(0,10),col="darkgray")
 points(data$X6a,col=rgb(.98,.69,.14,1))
 axis(4,c(seq(0, 10, 2)),c(seq(0, 10, 2)),ylab="bla",col=rgb(0.54,0.17,0.89,0.4))
-mtext("Willingness to Pay", side=4, col=rgb(.98,.69,.14,1), line = -2)
-legend("topright", c("Average Traveling Costs by Car (60 cents/km)","German Tax Refunds (30 cents/km)","Fitted Expected Payout","Fitted Willingness to Pay"), fill=c("green","blue", "gray",rgb(.98,.69,.14,1)),cex = 1.2)
+mtext("Willingness to Pay in Euro", side=4, col=rgb(.98,.69,.14,1), line = -2)
 eppklm = lm(X7a ~ X.1c., data=data)
 summary(eppklm)$sigma #1.066353
 abline(eppklm,col="darkgray")
 abline(wtplm,col=	rgb(.98,.69,.14,1))
 abline(0,0.3,col="blue")
 abline(0,0.6,col="green")
+legend("topright", c("Average Traveling Costs by Car (0,6\u20ac/km)","German Tax Refunds (0,3\u20ac/km)","Fitted Expected Payout","Fitted Willingness to Pay"), fill=c("green","blue", "gray",rgb(.98,.69,.14,1)),cex = 1.2)
+
 
 
 
@@ -208,6 +192,11 @@ hist(data$X9b,xlab="Reasons for not being interested in ride-sharing",xaxt='n',y
 axis(1,c(1.5:7.5),c("1", "2", "3", "4", "5", "6", "7"))
 legend("topright", 95, legend=c("1: Public transport is more convenient"  ,"2: Not interested financially","3: No Need","4: Loss of privacy",
                                 "5: Public transport is more convenient and especially more sustainable","6: Traffic jams","7: Environment"), cex=.95)
+
+hist(data$X5g,xlab="Preferred Matching Characteristic", xaxt='n',ylim=c(0, 50), main="",  col="gray", breaks=8)
+axis(1,c(0.5:5.5),c("1", "2", "3", "4", "5", "6"))
+legend("topright", 95, legend=c("1: Just distance"  ,"2: Field of study","3: Age group / study degree","4: Gender",
+                                "5: Time of arrival","6: No special characteristics"), cex=.95)
 
 
 ### Influence on Ride-sharing
