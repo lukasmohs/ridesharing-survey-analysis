@@ -144,7 +144,7 @@ summary(wtplm)$sigma  # residual standard deviation:  2.343433
 abline(wtplm,col=rgb(.98,.69,.14,1))
 abline(0,0.15,col="blue")
 abline(0,0.6,col="green")
-legend("topright", c("Average traveling costs by car (0,6 euro/km)","German tax refunds (0,15 euro/km)",
+legend("topright", c("Average traveling costs by car (0.6 euro/km)","German tax refunds (0.15 euro/km)",
   "Fitted willingsness to pay"), fill=c("green","blue",rgb(.98,.69,.14,1)),cex = 1.2)
 mean(data$wppkm, na.rm=TRUE) # 0.1817779
 median(data$wppkm, na.rm=TRUE) # 0.1296794
@@ -184,7 +184,7 @@ abline(eppklm,col="darkgray")
 abline(wtplm,col=	rgb(.98,.69,.14,1))
 abline(0,0.15,col="blue")
 abline(0,0.6,col="green")
-legend("topright", c("Average traveling costs by car (0,6 euro/km)","German tax refunds (0,15 euro/km)",
+legend("topright", c("Average traveling costs by car (0.6 euro/km)","German tax refunds (0.15 euro/km)",
   "Fitted expected payout","Fitted willingness to pay"), fill=c("green","blue", "gray",rgb(.98,.69,.14,1)),cex = 1.2)
 
 
